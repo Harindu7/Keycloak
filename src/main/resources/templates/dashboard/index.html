@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Keycloak Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt me-2"></i>Keycloak Demo
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                    <a class="nav-link" href="/logout">Logout</a>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" href="/login">Login</a>
+                    <a class="nav-link" href="/auth/register">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Dashboard Header -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2>
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </h2>
+                        <p class="text-muted mb-0">Welcome back, <span th:text="${userName}"></span>!</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-success fs-6">
+                            <i class="fas fa-check-circle me-1"></i>Setup Complete
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User and Organization Overview -->
+        <div class="row g-4 mb-4">
+            <!-- User Profile Card -->
+            <div class="col-lg-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>User Profile
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Full Name:</strong></td>
+                                        <td><span th:text="${userName}"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td><span th:text="${userEmail}"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Account Status:</strong></td>
+                                        <td>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Active & Verified
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Member Since:</strong></td>
+                                        <td><span th:text="${userAccountStatus?.createdAt != null ? #temporals.format(userAccountStatus.createdAt, 'MMM dd, yyyy') : 'Recently'}"></span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Organization Details Card -->
+            <div class="col-lg-6">
+                <div class="card h-100 shadow-sm" th:if="${organization}">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-building me-2"></i>Organization Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center mb-3">
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-building fa-2x text-success"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Name:</strong></td>
+                                        <td><span th:text="${organization.name}"></span></td>
+                                    </tr>
+                                    <tr th:if="${organization.industry}">
+                                        <td><strong>Industry:</strong></td>
+                                        <td><span th:text="${organization.industry}"></span></td>
+                                    </tr>
+                                    <tr th:if="${organization.website}">
+                                        <td><strong>Website:</strong></td>
+                                        <td>
+                                            <a th:href="${organization.website}" target="_blank" class="text-decoration-none">
+                                                <span th:text="${organization.website}"></span>
+                                                <i class="fas fa-external-link-alt ms-1"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Setup Date:</strong></td>
+                                        <td><span th:text="${organization.createdAt != null ? #temporals.format(organization.createdAt, 'MMM dd, yyyy') : 'Recently'}"></span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Organization Description -->
+                        <div th:if="${organization.description}" class="mt-3">
+                            <h6 class="text-muted">Description</h6>
+                            <p class="mb-0" th:text="${organization.description}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Information Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Organization Contact Information -->
+            <div class="col-lg-6" th:if="${organization}">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-address-card me-2"></i>Contact Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6" th:if="${organization.address}">
+                                <h6 class="text-muted mb-2">Address</h6>
+                                <p class="mb-3">
+                                    <span th:text="${organization.address}"></span><br>
+                                    <span th:if="${organization.city}" th:text="${organization.city}"></span>
+                                    <span th:if="${organization.state}" th:text="', ' + ${organization.state}"></span>
+                                    <span th:if="${organization.zipCode}" th:text="' ' + ${organization.zipCode}"></span><br>
+                                    <span th:if="${organization.country}" th:text="${organization.country}"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <div th:if="${organization.phone}">
+                                    <h6 class="text-muted mb-2">Phone</h6>
+                                    <p class="mb-3">
+                                        <i class="fas fa-phone me-2"></i>
+                                        <span th:text="${organization.phone}"></span>
+                                    </p>
+                                </div>
+                                <div th:if="${organization.website}">
+                                    <h6 class="text-muted mb-2">Website</h6>
+                                    <p class="mb-3">
+                                        <i class="fas fa-globe me-2"></i>
+                                        <a th:href="${organization.website}" target="_blank" class="text-decoration-none">
+                                            <span th:text="${organization.website}"></span>
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Statistics -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Account Statistics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="bg-primary text-white rounded p-3 mb-2">
+                                    <i class="fas fa-calendar-check fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">Setup Status</h6>
+                                <small class="text-success">Complete</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-success text-white rounded p-3 mb-2">
+                                    <i class="fas fa-shield-check fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">Verification</h6>
+                                <small class="text-success">Verified</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-info text-white rounded p-3 mb-2">
+                                    <i class="fas fa-user-clock fa-2x"></i>
+                                </div>
+                                <h6 class="mb-1">Last Login</h6>
+                                <small class="text-muted">Today</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-primary w-100 h-100" onclick="alert('Feature coming soon!')">
+                                    <i class="fas fa-edit d-block mb-2 fa-2x"></i>
+                                    <span>Edit Profile</span>
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-success w-100 h-100" onclick="alert('Feature coming soon!')">
+                                    <i class="fas fa-building-circle-arrow-right d-block mb-2 fa-2x"></i>
+                                    <span>Update Organization</span>
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-info w-100 h-100" onclick="alert('Feature coming soon!')">
+                                    <i class="fas fa-users d-block mb-2 fa-2x"></i>
+                                    <span>Manage Team</span>
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-warning w-100 h-100" onclick="alert('Feature coming soon!')">
+                                    <i class="fas fa-cog d-block mb-2 fa-2x"></i>
+                                    <span>Settings</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

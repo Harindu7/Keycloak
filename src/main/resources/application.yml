@@ -1,0 +1,50 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/testkeycloak}
+      auto-index-creation: ${MONGO_AUTO_INDEX:true}
+  application:
+    name: ${APP_NAME:user-service}
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${KEYCLOAK_CLIENT_ID:spring-boot-app}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/spring-boot-realm}
+            user-name-attribute: preferred_username
+
+server:
+  port: ${SERVER_PORT:8081}
+
+# Keycloak Configuration
+keycloak:
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:spring-boot-realm}
+  resource: ${KEYCLOAK_CLIENT_ID:spring-boot-app}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET}
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
+
+# Application Configuration
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:8081}
+  email-verification-url: ${EMAIL_VERIFICATION_URL:http://localhost:8081/auth/verify-email}
+
+# Mailjet Configuration
+mailjet:
+  api:
+    key: ${MAILJET_API_KEY}
+    secret: ${MAILJET_API_SECRET}
+  from:
+    email: ${MAILJET_FROM_EMAIL}
+    name: ${MAILJET_FROM_NAME}
