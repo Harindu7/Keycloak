@@ -16,7 +16,7 @@ services:
       - keycloak-network
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:25.0
     container_name: keycloak
     environment:
       KC_DB: postgres
@@ -41,7 +41,7 @@ services:
       - keycloak-network
     volumes:
       - ./keycloak/themes:/opt/keycloak/themes
-
+      - ./target/Keycloak-0.0.1-SNAPSHOT-keycloak-event-listener.jar:/opt/keycloak/providers/keycloak-event-listener.jar
   mongodb:
     image: mongo:7.0
     container_name: keycloak-mongodb
